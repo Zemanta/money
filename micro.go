@@ -22,7 +22,7 @@ const (
 
 var ErrOverBounds = errors.New("Amount for money.Micro has to be larger than or equal to -9000000000000000 and less than or equal to 9000000000000000")
 var ErrInvalidInput = errors.New("Cannot convert string to money.Micro.")
-var ErrOverflow = errors.New("Overflow occured.")
+var ErrOverflow = errors.New("money: overflow occurred")
 
 type Micro int64
 
