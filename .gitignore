@@ -22,3 +22,30 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+## Common files
+# Linux
+.*
+!.gitignore
+*~
+
+# OSX
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# VIM
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
