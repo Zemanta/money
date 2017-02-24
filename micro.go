@@ -83,10 +83,6 @@ func ToFloatString(amount Micro) (string, error) {
 
 func FromFloat64(amount float64) (Micro, error) {
 	fPrecision := float64(precision)
-	if amount == -9223372036854.775808 {
-		fmt.Println(amount)
-		fmt.Println(float64(MaxMicro) / fPrecision)
-	}
 	if amount > float64(MaxMicro)/fPrecision || amount < float64(MinMicro)/fPrecision {
 		return 0, ErrOverflow
 	}
