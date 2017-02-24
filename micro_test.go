@@ -24,6 +24,13 @@ type addTest struct {
 	err      error
 }
 
+type mulTest struct {
+	input1   Micro
+	input2   int64
+	expected Micro
+	err      error
+}
+
 var parseFloatStringTests = []parseFloatStringTest{
 	{"", Micro(0), ErrInvalidInput},
 	{"1", Dollar, nil},
@@ -107,6 +114,8 @@ var addTests = []addTest{
 	{Micro(0), Micro(0), Micro(0), nil},
 	{Micro(0), Micro(1), Micro(1), nil},
 	{Micro(1), Micro(0), Micro(1), nil},
+	{Micro(0), Micro(-1), Micro(-1), nil},
+	{Micro(-1), Micro(0), Micro(-1), nil},
 
 	{Micro(math.MaxInt64), Micro(math.MaxInt64), 0, ErrOverflow},
 	{Micro(math.MaxInt64), Micro(1), 0, ErrOverflow},
@@ -115,6 +124,27 @@ var addTests = []addTest{
 	{Micro(math.MinInt64), Micro(math.MinInt64), 0, ErrOverflow},
 	{Micro(math.MinInt64), Micro(-1), 0, ErrOverflow},
 	{Micro(math.MinInt64), Micro(0), Micro(math.MinInt64), nil},
+}
+
+var mulTests = []mulTest{
+	{Micro(0), 0, Micro(0), nil},
+	{Micro(0), 1, Micro(0), nil},
+	{Micro(1), 0, Micro(0), nil},
+	{Micro(0), 1, Micro(0), nil},
+	{Micro(-1), 0, Micro(0), nil},
+	{Micro(-1), -1, Micro(1), nil},
+
+	{Micro(math.MaxInt64), 0, 0, nil},
+	{Micro(math.MaxInt64), 1, Micro(math.MaxInt64), nil},
+	{Micro(math.MaxInt64), 2, 0, ErrOverflow},
+	{Micro(math.MaxInt64), math.MaxInt64, 0, ErrOverflow},
+	{0, math.MaxInt64, 0, nil},
+
+	{Micro(math.MinInt64), 0, 0, nil},
+	{Micro(math.MinInt64), 1, Micro(math.MinInt64), nil},
+	{Micro(math.MinInt64), 2, 0, ErrOverflow},
+	{Micro(math.MinInt64), math.MinInt64, 0, ErrOverflow},
+	{0, math.MinInt64, 0, nil},
 }
 
 func TestMoneyTestSuite(t *testing.T) {
@@ -464,6 +494,14 @@ func (suite *MoneyTestSuite) TestParseFloatString() {
 func (suite *MoneyTestSuite) TestAdd() {
 	for _, test := range addTests {
 		result, err := Add(test.input1, test.input2)
+		suite.Equal(test.err, err, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
+		suite.Equal(test.expected, result, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
+	}
+}
+
+func (suite *MoneyTestSuite) TestMul() {
+	for _, test := range mulTests {
+		result, err := Mul(test.input1, test.input2)
 		suite.Equal(test.err, err, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
 		suite.Equal(test.expected, result, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
 	}
