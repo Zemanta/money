@@ -31,6 +31,14 @@ type mulTest struct {
 	err      error
 }
 
+type divTest struct {
+	input1   Micro
+	input2   int64
+	rounding byte
+	expected Micro
+	err      error
+}
+
 var parseFloatStringTests = []parseFloatStringTest{
 	{"", Micro(0), ErrInvalidInput},
 	{"1", Dollar, nil},
@@ -130,7 +138,6 @@ var mulTests = []mulTest{
 	{Micro(0), 0, Micro(0), nil},
 	{Micro(0), 1, Micro(0), nil},
 	{Micro(1), 0, Micro(0), nil},
-	{Micro(0), 1, Micro(0), nil},
 	{Micro(-1), 0, Micro(0), nil},
 	{Micro(-1), -1, Micro(1), nil},
 
@@ -145,6 +152,47 @@ var mulTests = []mulTest{
 	{Micro(math.MinInt64), 2, 0, ErrOverflow},
 	{Micro(math.MinInt64), math.MinInt64, 0, ErrOverflow},
 	{0, math.MinInt64, 0, nil},
+}
+
+var divTests = []divTest{
+	{Micro(0), 0, RoundingNone, Micro(0), ErrZeroDivision},
+	{Micro(0), 1, RoundingNone, Micro(0), nil},
+	{Micro(1), 0, RoundingNone, Micro(0), ErrZeroDivision},
+	{Micro(-1), 0, RoundingNone, Micro(0), ErrZeroDivision},
+	{Micro(-1), -1, RoundingNone, Micro(1), nil},
+
+	{Micro(math.MaxInt64), 1, RoundingNone, Micro(math.MaxInt64), nil},
+	{Micro(1000000), 2, RoundingNone, Micro(500000), nil},
+	{Micro(1000000), 3, RoundingNone, Micro(333333), nil},
+	{Micro(2000000), 3, RoundingNone, Micro(666666), nil},
+	{Micro(-2000000), 3, RoundingNone, Micro(-666666), nil},
+	{Micro(2000000), -3, RoundingNone, Micro(-666666), nil},
+
+	{Micro(1499), 1000, RoundingHalfAwayFromZero, Micro(1), nil},
+	{Micro(1500), 1000, RoundingHalfAwayFromZero, Micro(2), nil},
+	{Micro(10), 7, RoundingHalfAwayFromZero, Micro(1), nil},
+	{Micro(11), 7, RoundingHalfAwayFromZero, Micro(2), nil},
+
+	{Micro(11), 2, RoundingHalfAwayFromZero, Micro(6), nil},
+	{Micro(12), 2, RoundingHalfAwayFromZero, Micro(6), nil},
+	{Micro(-1499), 1000, RoundingHalfAwayFromZero, Micro(-1), nil},
+	{Micro(-1500), 1000, RoundingHalfAwayFromZero, Micro(-2), nil},
+	{Micro(-10), 7, RoundingHalfAwayFromZero, Micro(-1), nil},
+	{Micro(-11), 7, RoundingHalfAwayFromZero, Micro(-2), nil},
+	{Micro(-11), 2, RoundingHalfAwayFromZero, Micro(-6), nil},
+	{Micro(-12), 2, RoundingHalfAwayFromZero, Micro(-6), nil},
+	{Micro(1499), -1000, RoundingHalfAwayFromZero, Micro(-1), nil},
+	{Micro(1500), -1000, RoundingHalfAwayFromZero, Micro(-2), nil},
+	{Micro(10), -7, RoundingHalfAwayFromZero, Micro(-1), nil},
+	{Micro(11), -7, RoundingHalfAwayFromZero, Micro(-2), nil},
+	{Micro(11), -2, RoundingHalfAwayFromZero, Micro(-6), nil},
+	{Micro(12), -2, RoundingHalfAwayFromZero, Micro(-6), nil},
+	{Micro(-1499), -1000, RoundingHalfAwayFromZero, Micro(1), nil},
+	{Micro(-1500), -1000, RoundingHalfAwayFromZero, Micro(2), nil},
+	{Micro(-10), -7, RoundingHalfAwayFromZero, Micro(1), nil},
+	{Micro(-11), -7, RoundingHalfAwayFromZero, Micro(2), nil},
+	{Micro(-11), -2, RoundingHalfAwayFromZero, Micro(6), nil},
+	{Micro(-12), -2, RoundingHalfAwayFromZero, Micro(6), nil},
 }
 
 func TestMoneyTestSuite(t *testing.T) {
@@ -437,44 +485,6 @@ func (suite *MoneyTestSuite) TestInvalidFromFloat64() {
 	suite.Equal(Micro(0), result)
 }
 
-func (suite *MoneyTestSuite) TestDivideAndRound() {
-	suite.Equal(DivideAndRound(1499, 1000), Micro(1))
-	suite.Equal(DivideAndRound(1500, 1000), Micro(2))
-
-	suite.Equal(DivideAndRound(10, 7), Micro(1))
-	suite.Equal(DivideAndRound(11, 7), Micro(2))
-
-	suite.Equal(DivideAndRound(11, 2), Micro(6))
-	suite.Equal(DivideAndRound(12, 2), Micro(6))
-
-	suite.Equal(DivideAndRound(-1499, 1000), Micro(-1))
-	suite.Equal(DivideAndRound(-1500, 1000), Micro(-2))
-
-	suite.Equal(DivideAndRound(-10, 7), Micro(-1))
-	suite.Equal(DivideAndRound(-11, 7), Micro(-2))
-
-	suite.Equal(DivideAndRound(-11, 2), Micro(-6))
-	suite.Equal(DivideAndRound(-12, 2), Micro(-6))
-
-	suite.Equal(DivideAndRound(1499, -1000), Micro(-1))
-	suite.Equal(DivideAndRound(1500, -1000), Micro(-2))
-
-	suite.Equal(DivideAndRound(10, -7), Micro(-1))
-	suite.Equal(DivideAndRound(11, -7), Micro(-2))
-
-	suite.Equal(DivideAndRound(11, -2), Micro(-6))
-	suite.Equal(DivideAndRound(12, -2), Micro(-6))
-
-	suite.Equal(DivideAndRound(-1499, -1000), Micro(1))
-	suite.Equal(DivideAndRound(-1500, -1000), Micro(2))
-
-	suite.Equal(DivideAndRound(-10, -7), Micro(1))
-	suite.Equal(DivideAndRound(-11, -7), Micro(2))
-
-	suite.Equal(DivideAndRound(-11, -2), Micro(6))
-	suite.Equal(DivideAndRound(-12, -2), Micro(6))
-}
-
 func (suite *MoneyTestSuite) TestParseFloatString() {
 	for _, test := range parseFloatStringTests {
 		result, err := parseFloatString(test.input)
@@ -494,6 +504,14 @@ func (suite *MoneyTestSuite) TestAdd() {
 func (suite *MoneyTestSuite) TestMul() {
 	for _, test := range mulTests {
 		result, err := Mul(test.input1, test.input2)
+		suite.Equal(test.err, err, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
+		suite.Equal(test.expected, result, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
+	}
+}
+
+func (suite *MoneyTestSuite) TestDiv() {
+	for _, test := range divTests {
+		result, err := Div(test.input1, test.input2, test.rounding)
 		suite.Equal(test.err, err, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
 		suite.Equal(test.expected, result, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
 	}
