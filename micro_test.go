@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"math/big"
 	"strings"
 	"testing"
 
@@ -473,47 +472,6 @@ func (suite *MoneyTestSuite) TestInvalidToFloatString() {
 	result, err = ToFloatString(Micro(-9000000000000001))
 	suite.Equal(ErrOverBounds, err)
 	suite.Equal("", result)
-}
-
-func (suite *MoneyTestSuite) TestValidFromBigRat() {
-	result, err := FromBigRat(big.NewRat(123764538, 1000000))
-	suite.Nil(err)
-	suite.Equal(Micro(123764538), result)
-
-	result, err = FromBigRat(big.NewRat(12352348976, 100000000))
-	suite.Nil(err)
-	suite.Equal(Micro(123523490), result)
-
-	result, err = FromBigRat(big.NewRat(123, 1))
-	suite.Nil(err)
-	suite.Equal(Micro(123000000), result)
-
-	result, err = FromBigRat(big.NewRat(123, 10))
-	suite.Nil(err)
-	suite.Equal(Micro(12300000), result)
-
-	result, err = FromBigRat(big.NewRat(0, 1))
-	suite.Nil(err)
-	suite.Equal(Micro(0), result)
-
-	upperBound := &big.Rat{}
-	upperBound.SetString("9000000000.000000")
-	result, err = FromBigRat(upperBound)
-	suite.Nil(err)
-	suite.Equal(Micro(9000000000000000), result)
-}
-
-func (suite *MoneyTestSuite) TestInvalidFromBigRat() {
-	money := &big.Rat{}
-	money.SetString("-9000000000.000001")
-	result, err := FromBigRat(money)
-	suite.Equal(ErrOverBounds, err)
-	suite.Equal(Micro(0), result)
-
-	money.SetString("9000000000.000001")
-	result, err = FromBigRat(money)
-	suite.Equal(ErrOverBounds, err)
-	suite.Equal(Micro(0), result)
 }
 
 func (suite *MoneyTestSuite) TestToFloat64Dollar() {

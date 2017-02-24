@@ -5,7 +5,6 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"math/big"
 	"strconv"
 	"strings"
 )
@@ -20,8 +19,6 @@ const (
 	Cent                 = 10000 * MicroDollar
 	Dollar               = 100 * Cent
 )
-
-var precisionRat = big.NewRat(int64(precision), 1)
 
 var ErrOverBounds = errors.New("Amount for money.Micro has to be larger than or equal to -9000000000000000 and less than or equal to 9000000000000000")
 var ErrInvalidInput = errors.New("Cannot convert string to money.Micro.")
@@ -108,16 +105,6 @@ func ToFloatString(amount Micro) (string, error) {
 		result = strings.TrimRight(buffer.String(), "0")
 	} else {
 		result = buffer.String()
-	}
-
-	return result, nil
-}
-
-func FromBigRat(amount *big.Rat) (Micro, error) {
-	// We need 7 decimal digits because of rounding.
-	result, err := FromFloatString(amount.FloatString(7))
-	if err != nil {
-		return 0, err
 	}
 
 	return result, nil
