@@ -485,44 +485,6 @@ func (suite *MoneyTestSuite) TestInvalidFromFloat64() {
 	suite.Equal(Micro(0), result)
 }
 
-//func (suite *MoneyTestSuite) TestDivideAndRound() {
-//	suite.Equal(DivideAndRound(1499, 1000), Micro(1))
-//	suite.Equal(DivideAndRound(1500, 1000), Micro(2))
-//
-//	suite.Equal(DivideAndRound(10, 7), Micro(1))
-//	suite.Equal(DivideAndRound(11, 7), Micro(2))
-//
-//	suite.Equal(DivideAndRound(11, 2), Micro(6))
-//	suite.Equal(DivideAndRound(12, 2), Micro(6))
-//
-//	suite.Equal(DivideAndRound(-1499, 1000), Micro(-1))
-//	suite.Equal(DivideAndRound(-1500, 1000), Micro(-2))
-//
-//	suite.Equal(DivideAndRound(-10, 7), Micro(-1))
-//	suite.Equal(DivideAndRound(-11, 7), Micro(-2))
-//
-//	suite.Equal(DivideAndRound(-11, 2), Micro(-6))
-//	suite.Equal(DivideAndRound(-12, 2), Micro(-6))
-//
-//	suite.Equal(DivideAndRound(1499, -1000), Micro(-1))
-//	suite.Equal(DivideAndRound(1500, -1000), Micro(-2))
-//
-//	suite.Equal(DivideAndRound(10, -7), Micro(-1))
-//	suite.Equal(DivideAndRound(11, -7), Micro(-2))
-//
-//	suite.Equal(DivideAndRound(11, -2), Micro(-6))
-//	suite.Equal(DivideAndRound(12, -2), Micro(-6))
-//
-//	suite.Equal(DivideAndRound(-1499, -1000), Micro(1))
-//	suite.Equal(DivideAndRound(-1500, -1000), Micro(2))
-//
-//	suite.Equal(DivideAndRound(-10, -7), Micro(1))
-//	suite.Equal(DivideAndRound(-11, -7), Micro(2))
-//
-//	suite.Equal(DivideAndRound(-11, -2), Micro(6))
-//	suite.Equal(DivideAndRound(-12, -2), Micro(6))
-//}
-
 func (suite *MoneyTestSuite) TestParseFloatString() {
 	for _, test := range parseFloatStringTests {
 		result, err := parseFloatString(test.input)
