@@ -22,6 +22,7 @@ const (
 
 var ErrOverBounds = errors.New("Amount for money.Micro has to be larger than or equal to -9000000000000000 and less than or equal to 9000000000000000")
 var ErrInvalidInput = errors.New("Cannot convert string to money.Micro.")
+var ErrOverflow = errors.New("money: overflow occurred")
 
 type Micro int64
 
@@ -282,4 +283,16 @@ func parseFloatStringInt(amount string) (Micro, error) {
 	}
 
 	return Micro(resultSigned), nil
+}
+
+func Add(a Micro, b Micro) (Micro, error) {
+	result := a + b
+
+	if a < 0 && b < 0 && result >= 0 {
+		return 0, ErrOverflow
+	}
+	if a > 0 && b > 0 && result <= 0 {
+		return 0, ErrOverflow
+	}
+	return result, nil
 }

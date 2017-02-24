@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 	"testing"
 
@@ -13,6 +14,13 @@ import (
 
 type parseFloatStringTest struct {
 	input    string
+	expected Micro
+	err      error
+}
+
+type addTest struct {
+	input1   Micro
+	input2   Micro
 	expected Micro
 	err      error
 }
@@ -109,6 +117,20 @@ var parseFloatStringTests = []parseFloatStringTest{
 	{"1e+9223372036854775808", 0, ErrOverBounds},
 	{"1e-18446744073709551616", 0, nil},
 	{"1e+18446744073709551616", 0, ErrOverBounds},
+}
+
+var addTests = []addTest{
+	{Micro(0), Micro(0), Micro(0), nil},
+	{Micro(0), Micro(1), Micro(1), nil},
+	{Micro(1), Micro(0), Micro(1), nil},
+
+	{Micro(math.MaxInt64), Micro(math.MaxInt64), 0, ErrOverflow},
+	{Micro(math.MaxInt64), Micro(1), 0, ErrOverflow},
+	{Micro(math.MaxInt64), Micro(0), Micro(math.MaxInt64), nil},
+
+	{Micro(math.MinInt64), Micro(math.MinInt64), 0, ErrOverflow},
+	{Micro(math.MinInt64), Micro(-1), 0, ErrOverflow},
+	{Micro(math.MinInt64), Micro(0), Micro(math.MinInt64), nil},
 }
 
 func TestMoneyTestSuite(t *testing.T) {
@@ -613,5 +635,13 @@ func BenchmarkParseFloatString(b *testing.B) {
 		if err != nil {
 			b.Error(errors.New("Unsuccessful call."))
 		}
+	}
+}
+
+func (suite *MoneyTestSuite) TestAdd() {
+	for _, test := range addTests {
+		result, err := Add(test.input1, test.input2)
+		suite.Equal(test.err, err, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
+		suite.Equal(test.expected, result, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
 	}
 }
