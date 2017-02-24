@@ -251,118 +251,118 @@ func (suite *MoneyTestSuite) TestInvalidUnmarshalJSON() {
 	suite.Equal(Micro(10), m)
 }
 
-func (suite *MoneyTestSuite) TestValidFromFloatString() {
-	result, err := FromFloatString("123.764538")
+func (suite *MoneyTestSuite) TestValidFromString() {
+	result, err := FromString("123.764538")
 	suite.Nil(err)
 	suite.Equal(Micro(123764538), result)
 
-	result, err = FromFloatString("123.52348976")
+	result, err = FromString("123.52348976")
 	suite.Nil(err)
 	suite.Equal(Micro(123523490), result)
 
-	result, err = FromFloatString("0000123.523489")
+	result, err = FromString("0000123.523489")
 	suite.Nil(err)
 	suite.Equal(Micro(123523489), result)
 
-	result, err = FromFloatString("123")
+	result, err = FromString("123")
 	suite.Nil(err)
 	suite.Equal(Micro(123000000), result)
 
-	result, err = FromFloatString("12.3")
+	result, err = FromString("12.3")
 	suite.Nil(err)
 	suite.Equal(Micro(12300000), result)
 
-	result, err = FromFloatString("-12")
+	result, err = FromString("-12")
 	suite.Nil(err)
 	suite.Equal(Micro(-12000000), result)
 
-	result, err = FromFloatString("-12.3")
+	result, err = FromString("-12.3")
 	suite.Nil(err)
 	suite.Equal(Micro(-12300000), result)
 }
 
-func (suite *MoneyTestSuite) TestInvalidFromFloatString() {
-	result, err := FromFloatString("123.764.538")
+func (suite *MoneyTestSuite) TestInvalidFromString() {
+	result, err := FromString("123.764.538")
 	suite.Equal(ErrInvalidInput, err)
 	suite.Equal(Micro(0), result)
 
-	result, err = FromFloatString("123.7 64538")
+	result, err = FromString("123.7 64538")
 	suite.Equal(ErrInvalidInput, err)
 	suite.Equal(Micro(0), result)
 
-	result, err = FromFloatString("a123.764538")
+	result, err = FromString("a123.764538")
 	suite.Equal(ErrInvalidInput, err)
 	suite.Equal(Micro(0), result)
 
-	result, err = FromFloatString("13849502840392485906123.764538")
+	result, err = FromString("13849502840392485906123.764538")
 	suite.Equal(ErrOverflow, err)
 	suite.Equal(Micro(0), result)
 
-	result, err = FromFloatString("-9223372036854.775809")
+	result, err = FromString("-9223372036854.775809")
 	suite.Equal(ErrOverflow, err)
 	suite.Equal(Micro(0), result)
 
-	result, err = FromFloatString("9223372036854.775808")
+	result, err = FromString("9223372036854.775808")
 	suite.Equal(ErrOverflow, err)
 	suite.Equal(Micro(0), result)
 }
 
-func (suite *MoneyTestSuite) TestInvalidFromFloatStringWithExp() {
-	result, err := FromFloatString("123.764538e6")
+func (suite *MoneyTestSuite) TestInvalidFromStringWithExp() {
+	result, err := FromString("123.764538e6")
 	suite.Equal(ErrInvalidInput, err)
 	suite.Equal(Micro(0), result)
 
-	result, err = FromFloatString("123.764538E6")
+	result, err = FromString("123.764538E6")
 	suite.Equal(ErrInvalidInput, err)
 	suite.Equal(Micro(0), result)
 
-	result, err = FromFloatString("123.764538e+6")
+	result, err = FromString("123.764538e+6")
 	suite.Equal(ErrInvalidInput, err)
 	suite.Equal(Micro(0), result)
 
-	result, err = FromFloatString("3.7e10")
+	result, err = FromString("3.7e10")
 	suite.Equal(ErrInvalidInput, err)
 	suite.Equal(Micro(0), result)
 
-	result, err = FromFloatString("-3.7e10")
+	result, err = FromString("-3.7e10")
 	suite.Equal(ErrInvalidInput, err)
 	suite.Equal(Micro(0), result)
 
-	result, err = FromFloatString("3.7134234545e10")
+	result, err = FromString("3.7134234545e10")
 	suite.Equal(ErrInvalidInput, err)
 	suite.Equal(Micro(0), result)
 }
 
-func (suite *MoneyTestSuite) TestValidToFloatString() {
-	result, err := ToFloatString(123764538)
+func (suite *MoneyTestSuite) TestValidToString() {
+	result, err := ToString(123764538)
 	suite.Nil(err)
 	suite.Equal("123.764538", result)
 
-	result, err = ToFloatString(-999999)
+	result, err = ToString(-999999)
 	suite.Nil(err)
 	suite.Equal("-0.999999", result)
 
-	result, err = ToFloatString(12352348976)
+	result, err = ToString(12352348976)
 	suite.Nil(err)
 	suite.Equal("12352.348976", result)
 
-	result, err = ToFloatString(123523489000)
+	result, err = ToString(123523489000)
 	suite.Nil(err)
 	suite.Equal("123523.489", result)
 
-	result, err = ToFloatString(123)
+	result, err = ToString(123)
 	suite.Nil(err)
 	suite.Equal("0.000123", result)
 
-	result, err = ToFloatString(0)
+	result, err = ToString(0)
 	suite.Nil(err)
 	suite.Equal("0", result)
 
-	result, err = ToFloatString(-123000000)
+	result, err = ToString(-123000000)
 	suite.Nil(err)
 	suite.Equal("-123", result)
 
-	result, err = ToFloatString(-123764538)
+	result, err = ToString(-123764538)
 	suite.Nil(err)
 	suite.Equal("-123.764538", result)
 }
@@ -507,20 +507,20 @@ func (suite *MoneyTestSuite) TestMul() {
 	}
 }
 
-func BenchmarkFromFloatString(b *testing.B) {
+func BenchmarkFromString(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := FromFloatString("123.52348976")
+		_, err := FromString("123.52348976")
 		if err != nil {
 			b.Error(errors.New("Unsuccessful call."))
 		}
 	}
 }
 
-func BenchmarkFromFloatStringWithExp(b *testing.B) {
+func BenchmarkFromStringWithExp(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := FromFloatString("123.52348976e-2")
+		_, err := FromString("123.52348976e-2")
 		if err == nil {
 			b.Error(errors.New("Unsuccessful call."))
 		}
