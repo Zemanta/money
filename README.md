@@ -22,6 +22,7 @@ Run `go get github.com/Zemanta/money`
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/Zemanta/money"
@@ -35,10 +36,12 @@ func main() {
 		log.Fatal("Error")
 	}
 
-	if balance-m < 0 {
+	newBalance := balance - m
+	if newBalance < 0 {
 		log.Fatal("Not enough money")
 	}
 
-	// Continue with the transaction
+	s, _ := money.ToString(newBalance)
+	fmt.Println(s)
 }
 ```
