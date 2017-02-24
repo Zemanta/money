@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/Zemanta/money/tree/master.svg?style=svg)](https://circleci.com/gh/Zemanta/money/tree/master)
 
-A precise fixed-point Go (golang) package for handling money as int64 supporting up to 6 decimal places. Useful when handling smaller amounts but need percision and fast math operations.
+A precise fixed-point Go (golang) package for handling money as int64 supporting up to 6 decimal places. Useful when handling smaller amounts but need precision and fast math operations.
 
 ## Features
 
