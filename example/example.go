@@ -20,6 +20,5 @@ func main() {
 		log.Fatal("Not enough money")
 	}
 
-	s, _ := money.ToString(newBalance)
-	fmt.Println(s)
+	fmt.Println(money.ToString(newBalance))
 }

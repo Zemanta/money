@@ -26,10 +26,7 @@ var ErrOverflow = errors.New("money: overflow occurred")
 type Micro int64
 
 func (micro Micro) MarshalJSON() ([]byte, error) {
-	result, err := ToString(micro)
-	if err != nil {
-		return nil, err
-	}
+	result := ToString(micro)
 	return []byte(result), nil
 }
 
@@ -50,7 +47,7 @@ func FromString(amount string) (Micro, error) {
 	return parseFloatString(amount)
 }
 
-func ToString(amount Micro) (string, error) {
+func ToString(amount Micro) string {
 	decimal := amount / precision
 	fraction := amount % precision
 
@@ -78,7 +75,7 @@ func ToString(amount Micro) (string, error) {
 		result = buffer.String()
 	}
 
-	return result, nil
+	return result
 }
 
 func FromFloat64(amount float64) (Micro, error) {

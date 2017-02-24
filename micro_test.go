@@ -334,36 +334,28 @@ func (suite *MoneyTestSuite) TestInvalidFromStringWithExp() {
 }
 
 func (suite *MoneyTestSuite) TestValidToString() {
-	result, err := ToString(123764538)
-	suite.Nil(err)
+	result := ToString(123764538)
 	suite.Equal("123.764538", result)
 
-	result, err = ToString(-999999)
-	suite.Nil(err)
+	result = ToString(-999999)
 	suite.Equal("-0.999999", result)
 
-	result, err = ToString(12352348976)
-	suite.Nil(err)
+	result = ToString(12352348976)
 	suite.Equal("12352.348976", result)
 
-	result, err = ToString(123523489000)
-	suite.Nil(err)
+	result = ToString(123523489000)
 	suite.Equal("123523.489", result)
 
-	result, err = ToString(123)
-	suite.Nil(err)
+	result = ToString(123)
 	suite.Equal("0.000123", result)
 
-	result, err = ToString(0)
-	suite.Nil(err)
+	result = ToString(0)
 	suite.Equal("0", result)
 
-	result, err = ToString(-123000000)
-	suite.Nil(err)
+	result = ToString(-123000000)
 	suite.Equal("-123", result)
 
-	result, err = ToString(-123764538)
-	suite.Nil(err)
+	result = ToString(-123764538)
 	suite.Equal("-123.764538", result)
 }
 
