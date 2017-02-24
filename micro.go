@@ -10,20 +10,23 @@ import (
 )
 
 const (
-	precisionExp         = int64(6)
-	precision            = Micro(1000000)
-	largestAmount        = int64(9000000000000000)
-	smallestAmount       = int64(-9000000000000000)
-	Zero                 = Micro(0)
-	MicroDollar    Micro = 1
-	Cent                 = 10000 * MicroDollar
-	Dollar               = 100 * Cent
+	precisionExp                   = int64(6)
+	precision                      = Micro(1000000)
+	largestAmount                  = int64(9000000000000000)
+	smallestAmount                 = int64(-9000000000000000)
+	Zero                           = Micro(0)
+	MicroDollar              Micro = 1
+	Cent                           = 10000 * MicroDollar
+	Dollar                         = 100 * Cent
+	RoundingNone                   = 0
+	RoundingHalfAwayFromZero       = 1
 )
 
 var ErrOverBounds = errors.New("Amount for money.Micro has to be larger than or equal to -9000000000000000 and less than or equal to 9000000000000000")
 var ErrInvalidInput = errors.New("Cannot convert string to money.Micro.")
 var ErrOverflow = errors.New("money: overflow")
 var ErrZeroDivision = errors.New("money: division by zero")
+var ErrUnsupportedRounding = errors.New("money: unsupported rounding")
 
 type Micro int64
 
@@ -128,13 +131,6 @@ func ToFloat64Dollar(amount Micro) (float64, error) {
 	result := float64(amount) / float64(precision)
 
 	return result, nil
-}
-
-func DivideAndRound(a Micro, b int64) Micro {
-	if (a < 0 || b < 0) && !(a < 0 && b < 0) {
-		return (a - (Micro(b) / 2)) / Micro(b)
-	}
-	return (a + (Micro(b) / 2)) / Micro(b)
 }
 
 func checkNumberBounds(amount int64) error {
@@ -309,14 +305,29 @@ func Mul(amount Micro, multiplier int64) (Micro, error) {
 	return result, nil
 }
 
-func Div(amount Micro, divisor int64) (Micro, error) {
+func divideAndRoundHalfAwayFromZero(a Micro, b Micro) Micro {
+	if (a < 0 || b < 0) && !(a < 0 && b < 0) {
+		return (a - (b / 2)) / b
+	}
+	return (a + (b / 2)) / b
+}
+
+func Div(amount Micro, divisor int64, rounding byte) (Micro, error) {
 	var div = Micro(divisor)
+	var result = Micro(0)
 
 	if div == 0 {
-		return Micro(0), ErrZeroDivision
+		return result, ErrZeroDivision
 	}
 
-	result := amount / div
+	switch rounding {
+	case RoundingNone:
+		result = amount / div
+	case RoundingHalfAwayFromZero:
+		result = divideAndRoundHalfAwayFromZero(amount, div)
+	default:
+		return result, ErrUnsupportedRounding
+	}
 
 	return result, nil
 }
