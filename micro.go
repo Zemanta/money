@@ -2,9 +2,9 @@ package money
 
 import (
 	"bytes"
-	"database/sql/driver"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -12,15 +12,14 @@ import (
 const (
 	precisionExp         = int64(6)
 	precision            = Micro(1000000)
-	largestAmount        = int64(9000000000000000)
-	smallestAmount       = int64(-9000000000000000)
+	largestAmount        = math.MaxInt64
+	smallestAmount       = math.MinInt64
 	Zero                 = Micro(0)
 	MicroDollar    Micro = 1
 	Cent                 = 10000 * MicroDollar
 	Dollar               = 100 * Cent
 )
 
-var ErrOverBounds = errors.New("Amount for money.Micro has to be larger than or equal to -9000000000000000 and less than or equal to 9000000000000000")
 var ErrInvalidInput = errors.New("Cannot convert string to money.Micro.")
 var ErrOverflow = errors.New("money: overflow occurred")
 
@@ -45,30 +44,6 @@ func (micro *Micro) UnmarshalJSON(src []byte) (err error) {
 	}
 	*micro = result
 	return nil
-}
-
-func (micro *Micro) Scan(src interface{}) (err error) {
-	if src == nil {
-		return
-	}
-
-	result, err := FromFloatString(string(src.([]uint8)))
-	if err != nil {
-		return err
-	}
-
-	*micro = result
-
-	return nil
-}
-
-func (micro Micro) Value() (driver.Value, error) {
-	val, err := ToFloatString(micro)
-	if err != nil {
-		return nil, err
-	}
-
-	return val, nil
 }
 
 func FromFloatString(amount string) (Micro, error) {
@@ -110,17 +85,23 @@ func ToFloatString(amount Micro) (string, error) {
 	return result, nil
 }
 
-func FromFloat64Dollar(amount float64) (Micro, error) {
-	resultFloat := amount * float64(precision)
-	result := int64(resultFloat)
-	if err := checkNumberBounds(result); err != nil {
-		return 0, err
+func FromFloat64(amount float64) (Micro, error) {
+	fPrecision := float64(precision)
+	if amount == -9223372036854.775808 {
+		fmt.Println(amount)
+		fmt.Println(float64(largestAmount) / fPrecision)
 	}
+	if amount > float64(largestAmount)/fPrecision || amount < float64(smallestAmount)/fPrecision {
+		return 0, ErrOverflow
+	}
+
+	resultFloat := amount * fPrecision
+	result := int64(resultFloat)
 
 	return Micro(result), nil
 }
 
-func ToFloat64Dollar(amount Micro) (float64, error) {
+func ToFloat64(amount Micro) (float64, error) {
 	if err := checkNumberBounds(int64(amount)); err != nil {
 		return 0, err
 	}
@@ -138,51 +119,13 @@ func DivideAndRound(a Micro, b int64) Micro {
 
 func checkNumberBounds(amount int64) error {
 	if amount < smallestAmount || amount > largestAmount {
-		return ErrOverBounds
+		return ErrOverflow
 	}
 
 	return nil
 }
 
 func parseFloatString(amount string) (Micro, error) {
-	if len(amount) == 0 {
-		return 0, ErrInvalidInput
-	}
-	result, err := parseFloatStringInt(amount)
-	if err != nil {
-		result, err = parseFloatStringFloat(amount)
-	}
-
-	return result, err
-}
-
-func parseFloatStringFloat(amount string) (Micro, error) {
-	result, err := strconv.ParseFloat(amount, 64)
-	if err != nil {
-		if errNumError, ok := err.(*strconv.NumError); ok {
-			if errNumError.Err == strconv.ErrRange {
-				return 0, ErrOverBounds
-			} else {
-				return 0, ErrInvalidInput
-			}
-		}
-		return 0, err
-	}
-	result = result * float64(precision)
-	// Rounding
-	if result < 0 {
-		result -= 0.5
-	} else {
-		result += 0.5
-	}
-	resultInt := int64(result)
-	if err := checkNumberBounds(resultInt); err != nil {
-		return 0, err
-	}
-	return Micro(resultInt), nil
-}
-
-func parseFloatStringInt(amount string) (Micro, error) {
 	if len(amount) == 0 {
 		return Micro(0), ErrInvalidInput
 	}
@@ -228,18 +171,18 @@ func parseFloatStringInt(amount string) (Micro, error) {
 			newResult := result * 10
 			// overflow
 			if result != newResult/10 {
-				return 0, ErrOverBounds
+				return 0, ErrOverflow
 			}
 
 			newResult += uint64(c - '0')
 			// This overflow check is valid because digits can only be 0-9.
 			if newResult < result*10 {
-				return 0, ErrOverBounds
+				return 0, ErrOverflow
 			}
 
 			// In the end, we use signed int64 and this makes sure it doesn't overflow
 			if (sign == 1 && newResult > 1<<63-1) || (sign == -1 && newResult > 1<<63) {
-				return 0, ErrOverBounds
+				return 0, ErrOverflow
 			}
 
 			if dotFound {
@@ -271,7 +214,7 @@ func parseFloatStringInt(amount string) (Micro, error) {
 			newResult := result * 10
 			// Overflow
 			if result != newResult/10 {
-				return 0, ErrOverBounds
+				return 0, ErrOverflow
 			}
 			result = newResult
 		}
