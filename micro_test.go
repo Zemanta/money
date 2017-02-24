@@ -521,7 +521,7 @@ func BenchmarkFromFloatStringWithExp(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := FromFloatString("123.52348976e-2")
-		if err != nil {
+		if err == nil {
 			b.Error(errors.New("Unsuccessful call."))
 		}
 	}
