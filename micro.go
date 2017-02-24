@@ -10,14 +10,14 @@ import (
 )
 
 const (
-	precisionExp         = int64(6)
-	precision            = Micro(1000000)
-	largestAmount        = math.MaxInt64
-	smallestAmount       = math.MinInt64
-	Zero                 = Micro(0)
-	MicroDollar    Micro = 1
-	Cent                 = 10000 * MicroDollar
-	Dollar               = 100 * Cent
+	precisionExp       = int64(6)
+	precision          = Micro(1000000)
+	MaxMicro           = math.MaxInt64
+	MinMicro           = math.MinInt64
+	Zero               = Micro(0)
+	MicroDollar  Micro = 1
+	Cent               = 10000 * MicroDollar
+	Dollar             = 100 * Cent
 )
 
 var ErrInvalidInput = errors.New("Cannot convert string to money.Micro.")
@@ -51,10 +51,6 @@ func FromFloatString(amount string) (Micro, error) {
 }
 
 func ToFloatString(amount Micro) (string, error) {
-	if err := checkNumberBounds(int64(amount)); err != nil {
-		return "", err
-	}
-
 	decimal := amount / precision
 	fraction := amount % precision
 
@@ -89,9 +85,9 @@ func FromFloat64(amount float64) (Micro, error) {
 	fPrecision := float64(precision)
 	if amount == -9223372036854.775808 {
 		fmt.Println(amount)
-		fmt.Println(float64(largestAmount) / fPrecision)
+		fmt.Println(float64(MaxMicro) / fPrecision)
 	}
-	if amount > float64(largestAmount)/fPrecision || amount < float64(smallestAmount)/fPrecision {
+	if amount > float64(MaxMicro)/fPrecision || amount < float64(MinMicro)/fPrecision {
 		return 0, ErrOverflow
 	}
 
@@ -102,9 +98,6 @@ func FromFloat64(amount float64) (Micro, error) {
 }
 
 func ToFloat64(amount Micro) (float64, error) {
-	if err := checkNumberBounds(int64(amount)); err != nil {
-		return 0, err
-	}
 	result := float64(amount) / float64(precision)
 
 	return result, nil
@@ -115,14 +108,6 @@ func DivideAndRound(a Micro, b int64) Micro {
 		return (a - (Micro(b) / 2)) / Micro(b)
 	}
 	return (a + (Micro(b) / 2)) / Micro(b)
-}
-
-func checkNumberBounds(amount int64) error {
-	if amount < smallestAmount || amount > largestAmount {
-		return ErrOverflow
-	}
-
-	return nil
 }
 
 func parseFloatString(amount string) (Micro, error) {
@@ -221,9 +206,6 @@ func parseFloatString(amount string) (Micro, error) {
 	}
 
 	resultSigned := int64(result) * sign
-	if err := checkNumberBounds(resultSigned); err != nil {
-		return 0, err
-	}
 
 	return Micro(resultSigned), nil
 }
