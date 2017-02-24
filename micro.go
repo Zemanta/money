@@ -20,7 +20,7 @@ const (
 	Dollar             = 100 * Cent
 )
 
-var ErrInvalidInput = errors.New("Cannot convert string to money.Micro.")
+var ErrInvalidInput = errors.New("money: cannot convert string to money.Micro")
 var ErrOverflow = errors.New("money: overflow occurred")
 
 type Micro int64
@@ -219,16 +219,5 @@ func Add(a Micro, b Micro) (Micro, error) {
 	if a > 0 && b > 0 && result <= 0 {
 		return 0, ErrOverflow
 	}
-	return result, nil
-}
-
-func Mul(amount Micro, multiplier int64) (Micro, error) {
-	var mult = Micro(multiplier)
-	result := amount * mult
-
-	if mult != 0 && result/mult != amount {
-		return 0, ErrOverflow
-	}
-
 	return result, nil
 }
