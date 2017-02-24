@@ -221,3 +221,14 @@ func Add(a Micro, b Micro) (Micro, error) {
 	}
 	return result, nil
 }
+
+func Mul(amount Micro, multiplier int64) (Micro, error) {
+	var mult = Micro(multiplier)
+	result := amount * mult
+
+	if mult != 0 && result/mult != amount {
+		return 0, ErrOverflow
+	}
+
+	return result, nil
+}
