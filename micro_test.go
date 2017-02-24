@@ -32,6 +32,13 @@ type mulTest struct {
 	err      error
 }
 
+type divTest struct {
+	input1   Micro
+	input2   int64
+	expected Micro
+	err      error
+}
+
 var parseFloatStringTests = []parseFloatStringTest{
 	{"", Micro(0), ErrInvalidInput},
 	{"1", Dollar, nil},
@@ -146,7 +153,6 @@ var mulTests = []mulTest{
 	{Micro(0), 0, Micro(0), nil},
 	{Micro(0), 1, Micro(0), nil},
 	{Micro(1), 0, Micro(0), nil},
-	{Micro(0), 1, Micro(0), nil},
 	{Micro(-1), 0, Micro(0), nil},
 	{Micro(-1), -1, Micro(1), nil},
 
@@ -161,6 +167,21 @@ var mulTests = []mulTest{
 	{Micro(math.MinInt64), 2, 0, ErrOverflow},
 	{Micro(math.MinInt64), math.MinInt64, 0, ErrOverflow},
 	{0, math.MinInt64, 0, nil},
+}
+
+var divTests = []divTest{
+	{Micro(0), 0, Micro(0), ErrZeroDivision},
+	{Micro(0), 1, Micro(0), nil},
+	{Micro(1), 0, Micro(0), ErrZeroDivision},
+	{Micro(-1), 0, Micro(0), ErrZeroDivision},
+	{Micro(-1), -1, Micro(1), nil},
+
+	{Micro(math.MaxInt64), 1, Micro(math.MaxInt64), nil},
+	{Micro(1000000), 2, Micro(500000), nil},
+	{Micro(1000000), 3, Micro(333333), nil},
+	{Micro(2000000), 3, Micro(666666), nil},
+	{Micro(-2000000), 3, Micro(-666666), nil},
+	{Micro(2000000), -3, Micro(-666666), nil},
 }
 
 func TestMoneyTestSuite(t *testing.T) {
@@ -679,6 +700,14 @@ func (suite *MoneyTestSuite) TestAdd() {
 func (suite *MoneyTestSuite) TestMul() {
 	for _, test := range mulTests {
 		result, err := Mul(test.input1, test.input2)
+		suite.Equal(test.err, err, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
+		suite.Equal(test.expected, result, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
+	}
+}
+
+func (suite *MoneyTestSuite) TestDiv() {
+	for _, test := range divTests {
+		result, err := Div(test.input1, test.input2)
 		suite.Equal(test.err, err, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
 		suite.Equal(test.expected, result, fmt.Sprintf("Inputs: %d, %d", test.input1, test.input2))
 	}

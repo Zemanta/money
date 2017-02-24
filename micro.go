@@ -22,7 +22,8 @@ const (
 
 var ErrOverBounds = errors.New("Amount for money.Micro has to be larger than or equal to -9000000000000000 and less than or equal to 9000000000000000")
 var ErrInvalidInput = errors.New("Cannot convert string to money.Micro.")
-var ErrOverflow = errors.New("money: overflow occurred")
+var ErrOverflow = errors.New("money: overflow")
+var ErrZeroDivision = errors.New("money: division by zero")
 
 type Micro int64
 
@@ -304,6 +305,18 @@ func Mul(amount Micro, multiplier int64) (Micro, error) {
 	if mult != 0 && result/mult != amount {
 		return 0, ErrOverflow
 	}
+
+	return result, nil
+}
+
+func Div(amount Micro, divisor int64) (Micro, error) {
+	var div = Micro(divisor)
+
+	if div == 0 {
+		return Micro(0), ErrZeroDivision
+	}
+
+	result := amount / div
 
 	return result, nil
 }
