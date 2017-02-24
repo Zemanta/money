@@ -10,8 +10,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-
-	"b1/app"
 )
 
 type parseFloatStringTest struct {
@@ -112,6 +110,10 @@ var parseFloatStringTests = []parseFloatStringTest{
 	{"1e+9223372036854775808", 0, ErrOverBounds},
 	{"1e-18446744073709551616", 0, nil},
 	{"1e+18446744073709551616", 0, ErrOverBounds},
+}
+
+func TestMoneyTestSuite(t *testing.T) {
+	suite.Run(t, new(MoneyTestSuite))
 }
 
 type MoneyTestSuite struct {
@@ -654,9 +656,4 @@ func BenchmarkParseFloatString(b *testing.B) {
 			b.Error(errors.New("Unsuccessful call."))
 		}
 	}
-}
-
-func TestMoneyTestSuite(t *testing.T) {
-	app.ConfigureTest()
-	suite.Run(t, new(MoneyTestSuite))
 }
